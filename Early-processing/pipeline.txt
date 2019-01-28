@@ -1,0 +1,21 @@
+#1.use the index sequence to get raw.data.The raw fastq files of R1 and R2 is putted in /*/data/INPUT/
+$ ./github/Early_processing/sccpipe -I /*/data/INPUT/  -O /*/data/OUTPUT/
+
+
+#2.filiter the sequence including the CGACTCACTACAGGG,TCGGTGACACGATCG,TTTTTTTTTTTT 
+$ ./github/Early_processing/bbmap/bbduk2.sh in=/*/data/COL10_R1.fastq in2=/*/data/COL10_R2_001.fastq outm=/*/data/H_c1_R1_001.fastq outm2=/*/data/H_c1_R2_001.fastq fliteral=CGACTCACTACAGGG k=15 skipr2=t hdist=3 -Xmx58g
+
+$ ./github/Early_processing/bbmap/bbduk2.sh in=/*/data/H_c1_R1_001.fastq in2=/*/data/H_c1_R2_001.fastq outm=/*/data/H_c2_R1_001.fastq outm2=/*/data/H_c2_R2_001.fastq fliteral=TCGGTGACACGATCG k=15 skipr2=t hdist=3 -Xmx58g
+
+$ ./github/Early_processing/bbmap/bbduk2.sh in=/*/data/H_c2_R1_001.fastq in2=/*/data/H_c2_R2_001.fastq outm=/*/data/H_c3_R1_001.fastq outm2=/*/data/H_c3_R2_001.fastq fliteral=TTTTTTTTTTTT k=12 skipr2=t hdist=3 -Xmx58g
+
+
+#3.fastq to the bam file
+$ java -Xmx58g -jar ./github/Early_processing/Drop-seq_tools/3rdParty/picard/picard.jar  FastqToSam F1=/*/data/H_c3_R1_001.fastq F2=/*/data/H_c3_R2_001.fastq  O=/*/data/Lung.bam QUALITY_FORMAT=Standard SAMPLE_NAME=sample_name
+
+
+#4.get dge(Digital gene expression)
+$ ./github/Early_processing/Drop-seq_tools/scHCL.sh  -g /*/STAR_Reference_Human/genomeDir -r /*/STAR_Reference_Human/Homo_sapiens.GRCh38.fa -d ./github/Early_processing/Drop-seq_tools/ -o /*/data/ -t /*/data/ -s ./github/Early_processing/STAR-2.5.2a/source/STAR  /*/data/Lung.bam
+
+
+
